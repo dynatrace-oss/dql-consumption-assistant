@@ -1,23 +1,18 @@
 # Support
 
-## Support model
+> **This repository is provided without support or maintenance.**
 
-Describe how this repository is supported.
+This project is archived and no active support is available. No bug fixes, security patches, or feature updates will be made.
 
-Examples:
-- Community-supported by maintainers on a best-effort basis
-- Maintained by the owning team for internal or strategic use
-- Experimental project with limited support
+## What this means
 
-## How to get help
+- No responses to GitHub Issues or Discussions
+- No compatibility updates for new SDK, platform, or dependency versions
 
-Please use GitHub Issues for:
-- bug reports
-- feature requests
-- general questions related to this repository
+## Self-help resources
 
-If you believe you have found a security issue, do not file a public issue. Follow the instructions in `SECURITY.md`.
+If you are working with Dynatrace Apps or the Dynatrace SDK, the following resources may help:
 
-## Commercial support
-
-Unless explicitly stated otherwise, this repository is not covered by standard Dynatrace commercial support.
+- [Dynatrace Developer Portal](https://developer.dynatrace.com) — official docs for building apps on Dynatrace
+- [Dynatrace Community](https://community.dynatrace.com) — forums and Q&A from the broader Dynatrace community
+- [Dynatrace SDK on npm](https://www.npmjs.com/search?q=%40dynatrace-sdk) — latest SDK packages and changelogs

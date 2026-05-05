@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.widget.json",
+  "compilerOptions": {
+    "types": ["jest", "jest-environment-jsdom"],
+  },
+  "include": ["**/*.widget.test.tsx"]
+}

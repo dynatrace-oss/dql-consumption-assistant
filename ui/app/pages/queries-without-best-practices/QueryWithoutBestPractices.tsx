@@ -1,0 +1,59 @@
+import { Flex } from "@dynatrace/strato-components/layouts";
+import { Paragraph, Code } from "@dynatrace/strato-components/typography";
+import React from "react";
+import { useIntl } from "react-intl";
+import AppPage from "../../components/app-page/AppPage";
+import GenericDataTable from "../../components/data-table/GenericDataTable";
+import { queryStringMessage, queryUserEmail } from "../messages";
+import { appDescriptionMessage, appTitleMessage } from "./messages";
+import useGiveQueriesWithoutPracticeResult from "./useGiveQueriesWithoutPracticeResult";
+import useGiveTableColumns from "./useGiveTableColumns";
+import type { QueriesWithoutBestPracticeResultType } from "./types";
+
+const QueryWithoutBestPractices: React.FC = () => {
+  const { columns } = useGiveTableColumns();
+  const { data, isLoading, isError, error, isSuccess, refetch } =
+    useGiveQueriesWithoutPracticeResult();
+
+  const intl = useIntl();
+
+  const expandableRowsJsx = (rowData: QueriesWithoutBestPracticeResultType) => {
+    return (
+      <Flex padding={16} flexDirection="column">
+        <Paragraph>
+          {intl.formatMessage(queryStringMessage)} &nbsp;
+          <Code>{rowData.Query}</Code>
+        </Paragraph>
+        <Paragraph>
+          {intl.formatMessage(queryUserEmail)} &nbsp;
+          <Code>{rowData.User}</Code>
+        </Paragraph>
+      </Flex>
+    );
+  };
+
+  return (
+    <AppPage
+      error={error}
+      isError={isError}
+      title={intl.formatMessage(appTitleMessage)}
+      description={intl.formatMessage(appDescriptionMessage)}
+      isSuccess={isSuccess}
+      isLoading={isLoading}
+      handleRunQueryClick={() => {
+        void refetch();
+      }}
+    >
+      <GenericDataTable
+        data={data}
+        columns={columns}
+        isLoading={isLoading}
+        isThereRowActions
+        isThereExpandableRows
+        expandableRowsJsx={expandableRowsJsx}
+      />
+    </AppPage>
+  );
+};
+
+export default QueryWithoutBestPractices;

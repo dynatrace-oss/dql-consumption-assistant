@@ -1,117 +1,137 @@
-# Repository Template
+# DQL Consumption Assistant
 
-This template is the starting point for new repositories in the `dynatrace-oss` organization.
+A [Dynatrace App](https://developer.dynatrace.com) that tracks **DQL (Dynatrace Query Language) consumption costs** across your entire environment. It helps teams identify which dashboards, notebooks, users, apps, and queries are driving on-demand spend and automatically enforces limits before bills grow unchecked.
 
-Creating a repository in `dynatrace-oss` establishes an ongoing ownership, maintenance, and lifecycle commitment. Before a repository is published or actively used, the owning team must confirm that the repository has clear ownership, appropriate documentation, and the minimum required governance and automation in place.
+---
 
-## Purpose
+## What It Does
 
-Use this template when creating a new repository that will live in `dynatrace-oss`.
+1. **Track consumption** — 15 analytical views across dashboards, notebooks, users, apps, and queries, each showing GiB scanned and cost.
+2. **Calculate costs** — translates raw GiB into dollar figures using your account's rate card or Dynatrace's public default.
+3. **Audit best practices** — flags queries that are missing DQL performance best practices.
+4. **Enforce thresholds** — a daily workflow checks per-user consumption against global and group-level GiB thresholds.
+5. **Manage cooldown groups** — over-threshold users are automatically added to restriction groups in cooldown group.
+6. **Notify stakeholders** — sends a daily summary email of who was added, removed, or unchanged across Logs, Events, and Traces.
+7. **Configure rate card** — switch between your account's contracted rates and Dynatrace's public rate card without touching code.
 
-This template provides a baseline structure for:
-- repository documentation
-- contribution guidance
-- community health files
-- basic automation
-- ownership and maintenance expectations
+---
 
-## Required actions after repository creation
+## Getting Started
 
-After creating a repository from this template, the owning team must complete the following before the repository is considered ready for active use or publication:
+### Prerequisites
 
-### 1. Replace placeholder content
-Update this README to describe:
-- what the repository contains
-- who it is for
-- how it should be used
-- how contributors can get started
-- any important limitations, prerequisites, or support boundaries
+- **Node.js** `>=22.0.0`
+- Access to a **Dynatrace tenant** with:
+  - All OAuth scopes listed in the [Architecture & Design](docs/Architecture.md#required-oauth-scopes)
 
-### 2. Confirm repository ownership
-Each repository must have:
-- a primary maintainer, DRI, or owning team
-- a documented support model
-- a `CODEOWNERS` file that reflects the responsible team or maintainers
+### Install
 
-Ownership must remain current over time. Repositories without durable ownership may be subject to review, restriction, or archival.
+```bash
+npm install
+```
 
-### 3. Review inherited community health files
-Some community health files may be inherited from organization defaults. The owning team is responsible for reviewing them and deciding whether repository-specific versions are needed.
+### Run Locally
 
-At minimum, review:
-- `CONTRIBUTING.md`
-- `CODE_OF_CONDUCT.md`
-- `SECURITY.md`
-- `SUPPORT.md`
+You do not need to deploy the app to use it. Running it locally connects to whichever Dynatrace tenant is configured in `app.config.json`.
 
-If the repository has different contribution, security, or support expectations than the organization defaults, add repository-specific versions.
+```bash
+npm run start
+```
 
-### 4. Confirm licensing
-Each repository must include the correct license for its contents. Do not assume the default is always appropriate. Confirm the intended license before publishing. More information on licensing can be found [here](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository).
+This opens the app in your browser with hot reload enabled. The dev server mounts mock settings from `settings/local-mock-data/values.json`, so rate card and threshold configuration is available immediately without deploying the Settings schema to your environment.
 
-### 5. Add or validate baseline automation
-At minimum, the repository should include automation appropriate to its contents. This usually includes:
-- Markdown linting
-- validation for configuration files where applicable
-- dependency update automation
-- any language-specific test or lint workflows needed for the project
+### Deploy to Dynatrace
 
-### 6. Validate publication readiness
-Before making a repository public, confirm that:
-- the repository has a clear purpose
-- ownership is defined
-- required documentation is present
-- the support model is clear
-- secrets are not present
-- branch protection and review expectations are in place where needed
+```bash
+npm run deploy
+```
 
-## Publication and support expectations
+After deploying, navigate to **Dynatrace → Apps → DQL Consumption Assistant** and open **Settings → DQL Consumption** to complete the configuration before running the workflow.
 
-Repositories in `dynatrace-oss` are not automatically considered commercially supported products.
+---
 
-Unless explicitly stated otherwise, maintainers should make support expectations clear in the repository documentation. If a project is community-supported, experimental, internal-only, or provided without official product support, that should be stated plainly in the README and/or `SUPPORT.md`.
+## Configuration
 
-Example language:
+All configuration lives in the **Settings** screen inside the app (or in `settings/local-mock-data/values.json` for local development). There are no `.env` files — the Dynatrace SDK handles auth context.
 
-> This project is open source and maintained by Dynatrace contributors. It is not covered by standard Dynatrace commercial support unless explicitly stated otherwise.
+Update `environmentUrl` in `app.config.json` to point at your own tenant before running or deploying.
 
-## Minimum recommended repository contents
+> When using the Account Rate Card, a valid OAuth2 client is required with scopes `account-uac-read`, `account-idm-read`, and `account-idm-write`. The Account ID field should contain only the UUID — omit the `urn:dtaccount:` prefix. If the account rate card fetch fails or returns empty, the app falls back to Dynatrace's public default rate card automatically.
 
-The following should usually be present in each repository:
+---
 
-- `README.md`
-- `LICENSE`
-- `CODEOWNERS`
-- `CONTRIBUTING.md` or inherited equivalent
-- `SECURITY.md` or inherited equivalent
-- `SUPPORT.md` or inherited equivalent
-- `AGENTS.md` or inherited equivalent 
-- issue templates
-- pull request template
-- baseline CI workflows
+## DQL Consumption Workflow
 
-## Repository lifecycle
+The app ships with an automation workflow that runs **daily at 10:00 AM** to enforce consumption limits across your organization. Once the initial setup is complete — including the recipient email address for cooldown notifications and the cooldown group names per data type — it reads everything from the app's Settings screen and handles threshold evaluation, group membership changes, and email delivery automatically.
 
-Creating a repository is the beginning of a lifecycle, not a one-time setup step. Repository owners are expected to maintain the repository over time, including:
-- keeping ownership information current
-- reviewing dependency and automation health
-- responding to contribution and support signals as appropriate
-- archiving or transferring the repository when it is no longer actively maintained or no longer belongs in the organization
+### Settings Reference
 
-## AI assistant guidance
+| Setting                   | Type     | Required | Description                                                                                               |
+| ------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| **Rate Card**             | Dropdown | Yes      | `Account Rate Card` uses your org's contracted pricing; `Default Rate Card` uses Dynatrace's public rates |
+| **OAuth2 Client ID**      | Text     | Yes      | Required scopes: `account-uac-read`, `account-idm-read`, `account-idm-write`                              |
+| **OAuth2 Client Secret**  | Secret   | Yes      | Authenticates requests to Dynatrace Account Management API                                                |
+| **OAuth2 Account ID**     | Text     | Yes      | Your account UUID — do not include the `urn:dtaccount:` prefix                                            |
+| **Global Threshold**      | Number   | Yes      | Default: `100 GiB`. Applied to all users not covered by a custom threshold                                |
+| **Custom Thresholds**     | List     | No       | Per-group overrides as `(Group Name, Threshold)` pairs — e.g. DevOps → 500, Viewers → 50                  |
+| **Logs Cooldown Group**   | Text     | No       | IAM group to restrict users who exceed their threshold for Log queries                                    |
+| **Events Cooldown Group** | Text     | No       | IAM group to restrict users who exceed their threshold for Event queries                                  |
+| **Traces Cooldown Group** | Text     | No       | IAM group to restrict users who exceed their threshold for Trace queries                                  |
 
-This repository includes repository-level guidance for AI coding assistants:
+---
 
-- `AGENTS.md` provides repository expectations and review guidance for agent-based coding tools
-- `.github/copilot-instructions.md` provides repository-wide instructions for GitHub Copilot
+## Architecture & Design
 
-## Repository Exemplars
+For data flow, workflow, routes, and tech stack details, see [docs/Architecture.md](docs/Architecture.md).
 
-Looking for some inspiration? Here are a few Dynatrace Open Source repo examples:
-- (https://github.com/dynatrace-oss/dynatrace-managed-mcp)
-- (https://github.com/dynatrace-oss/hash4j)
-- (https://github.com/dynatrace-oss/kimera)
+---
 
-## Questions
+## Routes
 
-For questions about repository setup, lifecycle expectations, or placement in `dynatrace-oss`, contact the [Open Source Program](https://dynatrace.sharepoint.com/sites/DevRel/SitePages/Open-Source-Program-Office.aspx).
+| Route                           | Page                                                              |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `/`                             | Welcome — landing page with navigation overview                   |
+| `/top-dashboards`               | Top Dashboards — ranked by total DQL cost                         |
+| `/dashboard-users`              | Dashboard Users — consumption per user, scoped to dashboards      |
+| `/dashboard-queries`            | Dashboard Queries — individual queries executed inside dashboards |
+| `/top-notebooks`                | Top Notebooks — ranked by total DQL cost                          |
+| `/notebooks-users`              | Notebook Users — consumption per user, scoped to notebooks        |
+| `/notebooks-queries`            | Notebook Queries — individual queries executed inside notebooks   |
+| `/top-users`                    | Top Users — ranked by total DQL cost across all sources           |
+| `/users-apps`                   | Users → Apps — app breakdown per user                             |
+| `/users-queries`                | Users → Queries — query breakdown per user                        |
+| `/top-apps`                     | Top Apps — Dynatrace apps ranked by total DQL cost                |
+| `/apps-users`                   | App Users — consumption per user, scoped to each app              |
+| `/apps-queries`                 | App Queries — individual queries executed by each app             |
+| `/top-queries`                  | Top Queries — all queries ranked by total DQL cost                |
+| `/query-without-best-practices` | Best Practices — queries missing DQL performance best practices   |
+| `*`                             | 404 — page not found                                              |
+
+---
+
+## Tech Stack
+
+| Layer                 | Technology                                            |
+| --------------------- | ----------------------------------------------------- |
+| Framework             | React 18.3.1, React Router DOM 7.12.0                 |
+| Language              | TypeScript 5.9.3                                      |
+| UI Components         | Dynatrace Strato Components 1.14.0 + Preview 2.11.2   |
+| Styling               | Styled Components 6.1.19                              |
+| State & Data Fetching | React Context, custom DQL hooks (`useCustomDqlQuery`) |
+| i18n                  | React Intl 7.1.14                                     |
+| Validation            | Zod 4.0.14                                            |
+| Build Tool            | Dynatrace App Toolkit (`dt-app` 1.4.2)                |
+| Backend               | Dynatrace SDK clients — no standalone server          |
+
+---
+
+## Limitations
+
+- **No historical trending** — the app shows consumption for a selected timeframe but does not store snapshots or support trend comparisons over time.
+- **Platform-locked** — the app runs inside the Dynatrace browser shell. It cannot be deployed as a standalone web server.
+
+---
+
+> **This repository is archived and is no longer maintained.**
+>
+> No bug fixes, feature updates, or pull requests will be accepted. The code is provided as-is for reference only. For supported Dynatrace app development resources, visit the [Dynatrace Developer Portal](https://developer.dynatrace.com).

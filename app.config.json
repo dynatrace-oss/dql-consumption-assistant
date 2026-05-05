@@ -1,0 +1,42 @@
+{
+  "$schema": "./.dt-app/app.config.schema.json",
+  "environmentUrl": "https://playground.apps.dynatrace.com",
+  "app": {
+    "name": "DQL Consumption Assistant",
+    "version": "0.0.0",
+    "description": "Monitor DQL costs and notify when consumption limits are exceeded",
+    "id": "dynatrace.dql.consumption.assistant",
+    "scopes": [
+      {
+        "name": "app-settings:objects:read",
+        "comment": "Read app settings for fetching rate card values"
+      },
+      {
+        "name": "automation:workflows:read",
+        "comment": "Needed to read the Workflows to find ingested workflow"
+      },
+      { "name": "storage:logs:read", "comment": "Query Logs data" },
+      { "name": "storage:entities:read", "comment": "Query data from GRAIL" },
+      { "name": "storage:system:read", "comment": "Query data from GRAIL" },
+      { "name": "storage:buckets:read", "comment": "Query data from GRAIL" },
+      { "name": "storage:logs:write", "comment": "Application Log Monitoring" },
+      {
+        "name": "storage:events:write",
+        "comment": "Application Event Monitoring"
+      },
+      {
+        "name": "document:documents:read",
+        "comment": "To get names for dashboard and notebooks"
+      }
+    ],
+    "actions": [
+      {
+        "title": "UsersConsumption",
+        "description": "Calculate high consumption for users.",
+        "name": "calculate_users_consumption",
+        "stateful": true
+      }
+    ]
+  },
+  "plugins": ["@dynatrace-sdk/dt-app-plugin-client-app-settings-v2"]
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://developer.dynatrace.com/docs-assets/schema_strict_apps.json",
+  "dynatrace": "1",
+  "schemaId": "get-settings-values",
+  "version": "0.0.0",
+  "summaryPattern": "{rate_card_type} {client_id}",
+  "displayName": "DQL Consumption Assistant",
+  "description": "Update Settings For the DQL Consumption Assistant App",
+  "multiObject": true,
+  "maxObjects": 1,
+  "ordered": false,
+  "enums": {
+    "rate_card_type": {
+      "type": "enum",
+      "displayName": "Rate Card Type",
+      "items": [
+        {
+          "displayName": "Account Rate Card",
+          "value": "account",
+          "description": "Use your Accounts Rate Card"
+        },
+        {
+          "displayName": "Default Rate Card",
+          "value": "default",
+          "description": "Use Dynatrace's Default Rate Card - https://www.dynatrace.com/pricing/rate-card/"
+        }
+      ]
+    }
+  },
+  "types": {
+    "TcustomThreshold": {
+      "type": "object",
+      "properties": {
+        "group_name": {
+          "displayName": "Group Name",
+          "type": "text",
+          "default": ""
+        },
+        "threshold": {
+          "displayName": "Threshold",
+          "type": "float",
+          "default": 150
+        }
+      },
+      "summaryPattern": "{group_name}"
+    }
+  },
+  "properties": {
+    "rate_card_type": {
+      "displayName": "Select Rate Card",
+      "type": {
+        "$ref": "#/enums/rate_card_type"
+      },
+      "default": "account"
+    },
+    "client_id": {
+      "displayName": "OAuth2 Client ID",
+      "type": "text",
+      "default": "",
+      "description": "Requires scopes: `account-uac-read,account-idm-read,account-idm-write`"
+    },
+    "client_secret": {
+      "displayName": "OAuth2 Client Secret",
+      "type": "secret",
+      "default": ""
+    },
+    "account_id": {
+      "displayName": "OAuth2 Account ID",
+      "type": "text",
+      "default": "",
+      "description": "Do not include the `urn:dtaccount:` prefix"
+    },
+    "global_threshold": {
+      "displayName": "Global Threshold",
+      "description": "Default threshold applied to all groups that do not have a custom threshold configured.",
+      "type": "float",
+      "default": 100,
+      "nullable": false
+    },
+    "custom_thresholds": {
+      "displayName": "Custom Thresholds",
+      "description": "List of custom threshold configurations for individual groups",
+      "type": "list",
+      "items": {
+        "type": {
+          "$ref": "#/types/TcustomThreshold"
+        }
+      }
+    },
+    "events_cooldown_group": {
+      "displayName": "Events Cooldown Group",
+      "type": "text",
+      "nullable": true
+    },
+    "traces_cooldown_group": {
+      "displayName": "Traces Cooldown Group",
+      "type": "text",
+      "nullable": true
+    },
+    "logs_cooldown_group": {
+      "displayName": "Logs Cooldown Group",
+      "type": "text",
+      "nullable": true
+    }
+  },
+  "constraints": [
+    {
+      "type": "CUSTOM_VALIDATOR_REF",
+      "customValidatorId": "validate-threshold-schema"
+    },
+    {
+      "type": "SECRET_RESUBMISSION",
+      "customMessage": "For security reasons please re-enter token/password to save the new configuration.",
+      "checkAllProperties": false
+    }
+  ],
+  "schemaConstraints": []
+}

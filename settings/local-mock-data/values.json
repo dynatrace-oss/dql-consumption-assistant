@@ -1,0 +1,17 @@
+[
+  {
+    "schemaId": "get-settings-values",
+    "summary": "DQL App Local Values",
+    "value": {
+      "rate_card_type": "default",
+      "client_id": "<Client-ID>",
+      "client_secret": "<Client-Secret>",
+      "account_id": "<Account-ID>",
+      "global_threshold": 0,
+      "custom_thresholds": [{ "group_name": "DQL-test-Group", "threshold": 5 }],
+      "events_cooldown_group": "Events cooldown group test",
+      "traces_cooldown_group": "traces test group",
+      "logs_cooldown_group": "logs test group"
+    }
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.action.json",
+  "compilerOptions": {
+    "typeRoots": ["../node_modules/@dynatrace/js-runtime/types", "../node_modules/@types"],
+    "types": ["node", "runtime", "jest"],
+    "esModuleInterop": true
+  },
+  "include": ["**/*.action.test.ts"]
+}
